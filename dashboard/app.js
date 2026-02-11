@@ -6,6 +6,8 @@ const detail = document.getElementById("order-detail");
 const detailTitle = document.getElementById("detail-title");
 const detailBody = document.getElementById("detail-body");
 const closeDetail = document.getElementById("close-detail");
+const syncStatus = document.getElementById("sync-status");
+const syncTime = document.getElementById("sync-time");
 
 let allOrders = [];
 
@@ -102,6 +104,24 @@ function setSummary(summary) {
   document.getElementById("count-product-only").textContent = summary.product_only;
 }
 
+function formatTime(rawIso) {
+  if (!rawIso) return "-";
+  const d = new Date(rawIso);
+  if (Number.isNaN(d.getTime())) return rawIso;
+  return d.toLocaleString();
+}
+
+function setSyncMeta(meta) {
+  const last = meta?.last_live_event_at || "";
+  if (last) {
+    syncStatus.textContent = "Live sync: receiving webhooks";
+    syncTime.textContent = `Last webhook: ${formatTime(last)}`;
+    return;
+  }
+  syncStatus.textContent = "Live sync: waiting for first webhook";
+  syncTime.textContent = "No live Zoho event has been received yet.";
+}
+
 async function boot() {
   let payload = null;
   try {
@@ -123,6 +143,7 @@ async function boot() {
 
   allOrders = payload.orders || [];
   setSummary(payload.summary || {});
+  setSyncMeta(payload.meta || {});
   applyFilters();
 }
 
@@ -133,4 +154,6 @@ closeDetail.addEventListener("click", () => detail.close());
 boot().catch((err) => {
   emptyState.textContent = `Failed to load data: ${err.message}`;
   emptyState.classList.remove("hidden");
+  syncStatus.textContent = "Live sync: unavailable";
+  syncTime.textContent = "Could not reach dashboard API.";
 });

@@ -19,7 +19,7 @@ from urllib.parse import parse_qs, urlparse
 
 ROOT = Path(__file__).resolve().parent.parent
 DASHBOARD_DIR = ROOT / "dashboard"
-BOOTSTRAP_CSV = ROOT / "PKTracker_Report (2)_filled.csv"
+BOOTSTRAP_CSV = Path(os.getenv("ZP_BOOTSTRAP_CSV", str(ROOT / "PKTracker_Report (2)_filled.csv")))
 EVENTS_FILE = DASHBOARD_DIR / "live_events.jsonl"
 
 
@@ -28,8 +28,8 @@ def _split_csv_env(name: str, default: str) -> list[str]:
 
 
 CFG = {
-    "host": os.getenv("DASHBOARD_HOST", "127.0.0.1"),
-    "port": int(os.getenv("DASHBOARD_PORT", "8000")),
+    "host": os.getenv("DASHBOARD_HOST", "0.0.0.0"),
+    "port": int(os.getenv("PORT", os.getenv("DASHBOARD_PORT", "8000"))),
     "webhook_secret": os.getenv("ZP_WEBHOOK_SECRET", "").strip(),
     "prefix_keys": _split_csv_env("ZP_PREFIX_KEYS", "Prefix,prefix"),
     "ref_keys": _split_csv_env("ZP_REF_KEYS", "Ref Number,Reference Number,Ref_Number,ref_number"),
@@ -90,27 +90,96 @@ def normalize_payload(payload: dict[str, Any]) -> Entry:
     return Entry(prefix=prefix, ref_number=ref_number, stage=stage, user=user, added_time=added_time, raw=payload)
 
 
+def _find_column_index(header: list[str], keys: list[str]) -> int:
+    lookup = {c.strip().lower(): i for i, c in enumerate(header) if c.strip()}
+    for key in keys:
+        idx = lookup.get(key.lower())
+        if idx is not None:
+            return idx
+    return -1
+
+
+def _cell(row: list[str], idx: int) -> str:
+    if idx < 0 or idx >= len(row):
+        return ""
+    return (row[idx] or "").strip()
+
+
 def load_bootstrap_entries() -> list[Entry]:
     if not BOOTSTRAP_CSV.exists():
         return []
-    entries: list[Entry] = []
+
     with BOOTSTRAP_CSV.open(newline="", encoding="utf-8") as f:
-        r = csv.DictReader(f)
-        for row in r:
-            prefix = (row.get("Reference Numbers") or "").strip()
-            ref_number = (row.get("") or "").strip()
-            if not ref_number:
-                continue
-            entries.append(
-                Entry(
-                    prefix=prefix,
-                    ref_number=ref_number,
-                    stage=(row.get("Stage") or "").strip(),
-                    user=(row.get("USER") or "").strip(),
-                    added_time=(row.get("Added Time") or "").strip(),
-                    raw=row,
-                )
+        rows = list(csv.reader(f))
+
+    if not rows:
+        return []
+
+    header_row = [c.strip() for c in rows[0]]
+    second_row = [c.strip() for c in rows[1]] if len(rows) > 1 else []
+
+    prefix_idx = _find_column_index(header_row, CFG["prefix_keys"] + ["Reference Numbers"])
+    ref_idx = _find_column_index(header_row, CFG["ref_keys"])
+    user_idx = _find_column_index(header_row, CFG["user_keys"])
+    stage_idx = _find_column_index(header_row, CFG["stage_keys"])
+    time_idx = _find_column_index(header_row, CFG["time_keys"])
+    data_start = 1
+
+    second_prefix_idx = _find_column_index(second_row, CFG["prefix_keys"])
+    second_ref_idx = _find_column_index(second_row, CFG["ref_keys"])
+    if second_prefix_idx >= 0 and second_ref_idx >= 0:
+        prefix_idx = second_prefix_idx
+        ref_idx = second_ref_idx
+        data_start = 2
+
+    entries: list[Entry] = []
+    previous_user = ""
+    previous_stage = ""
+
+    for row in rows[data_start:]:
+        if not any(c.strip() for c in row):
+            continue
+
+        prefix = _cell(row, prefix_idx)
+        ref_number = _cell(row, ref_idx)
+        user = _cell(row, user_idx)
+        stage = _cell(row, stage_idx)
+        added_time = _cell(row, time_idx)
+
+        # Zoho report exports can include repeated field-name rows.
+        if ref_number.lower() in {"ref number", "reference number", "ref_number"}:
+            continue
+
+        # Business rule: when both USER and Stage are blank, inherit from previous row.
+        if not user and not stage:
+            user = previous_user
+            stage = previous_stage
+
+        if user:
+            previous_user = user
+        if stage:
+            previous_stage = stage
+
+        if not ref_number:
+            continue
+
+        entries.append(
+            Entry(
+                prefix=prefix,
+                ref_number=ref_number,
+                stage=stage,
+                user=user,
+                added_time=added_time,
+                raw={
+                    "prefix": prefix,
+                    "ref_number": ref_number,
+                    "stage": stage,
+                    "user": user,
+                    "added_time": added_time,
+                },
             )
+        )
+
     return entries
 
 
@@ -137,6 +206,27 @@ def append_live_event(payload: dict[str, Any]) -> None:
     }
     with EVENTS_FILE.open("a", encoding="utf-8") as f:
         f.write(json.dumps(event) + "\n")
+
+
+def last_live_event_received_at() -> str:
+    if not EVENTS_FILE.exists():
+        return ""
+
+    last = ""
+    with EVENTS_FILE.open(encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                last = line
+
+    if not last:
+        return ""
+
+    try:
+        item = json.loads(last)
+    except json.JSONDecodeError:
+        return ""
+    return str(item.get("received_at") or "")
 
 
 def classify(entries: list[Entry]) -> dict[str, Any]:
@@ -261,11 +351,22 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802
         parsed = urlparse(self.path)
         if parsed.path == "/api/health":
-            self._write_json(HTTPStatus.OK, {"ok": True, "time": datetime.utcnow().isoformat()})
+            self._write_json(
+                HTTPStatus.OK,
+                {
+                    "ok": True,
+                    "time": datetime.utcnow().isoformat(),
+                    "last_live_event_at": last_live_event_received_at(),
+                },
+            )
             return
         if parsed.path == "/api/orders":
             with LOCK:
                 data = classify(load_bootstrap_entries() + load_live_entries())
+                data["meta"] = {
+                    "last_live_event_at": last_live_event_received_at(),
+                    "bootstrap_csv": str(BOOTSTRAP_CSV),
+                }
             self._write_json(HTTPStatus.OK, data)
             return
         return super().do_GET()

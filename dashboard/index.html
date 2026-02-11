@@ -9,8 +9,14 @@
 <body>
   <main class="wrap">
     <header class="header">
-      <h1>Order Reconciliation Dashboard</h1>
-      <p>Track complete vs partial receiving status by order.</p>
+      <div>
+        <h1>Order Reconciliation Dashboard</h1>
+        <p>Track complete vs partial receiving status by order.</p>
+      </div>
+      <aside class="sync-panel" aria-live="polite">
+        <p id="sync-status" class="sync-label">Live sync: checking...</p>
+        <p id="sync-time" class="sync-time">-</p>
+      </aside>
     </header>
 
     <section class="cards" id="summary-cards">

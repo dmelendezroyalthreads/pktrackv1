@@ -39,6 +39,34 @@ body {
   margin-top: 0.35rem;
 }
 
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 1rem;
+}
+
+.sync-panel {
+  background: #fffdf4;
+  border: 1px solid #f2d98d;
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+  min-width: 260px;
+}
+
+.sync-label {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #7c5500;
+}
+
+.sync-time {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
 .cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -235,4 +263,15 @@ dialog article {
 
 #detail-body dd {
   margin: 0;
+}
+
+@media (max-width: 760px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .sync-panel {
+    min-width: 0;
+    width: 100%;
+  }
 }

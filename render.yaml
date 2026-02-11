@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: zoho-order-dashboard
+    runtime: python
+    plan: starter
+    buildCommand: ""
+    startCommand: python3 dashboard/server.py
+    envVars:
+      - key: ZP_WEBHOOK_SECRET
+        sync: false
+      - key: ZP_BOOTSTRAP_CSV
+        value: PKTracker_Report (2)_filled.csv
