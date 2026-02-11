@@ -236,6 +236,8 @@ def classify(entries: list[Entry]) -> dict[str, Any]:
             "ref_number": "",
             "paperwork_received": False,
             "product_received": False,
+            "move_to_machines": False,
+            "move_to_shipping": False,
             "users_seen": set(),
             "stages_seen": set(),
             "latest_added_time": "",
@@ -259,6 +261,10 @@ def classify(entries: list[Entry]) -> dict[str, Any]:
                 o["paperwork_received"] = True
             if s == "product received":
                 o["product_received"] = True
+            if s == "move to machines":
+                o["move_to_machines"] = True
+            if s == "move to shipping":
+                o["move_to_shipping"] = True
         if e.added_time:
             o["latest_added_time"] = e.added_time
         o["rows_for_order"] += 1
@@ -284,6 +290,8 @@ def classify(entries: list[Entry]) -> dict[str, Any]:
                 "ref_number": o["ref_number"],
                 "paperwork_received": o["paperwork_received"],
                 "product_received": o["product_received"],
+                "move_to_machines": o["move_to_machines"],
+                "move_to_shipping": o["move_to_shipping"],
                 "users_seen": "; ".join(sorted(o["users_seen"])),
                 "stages_seen": "; ".join(sorted(o["stages_seen"])),
                 "latest_added_time": o["latest_added_time"],

@@ -69,6 +69,8 @@ function renderRows(rows) {
       <td>${row.ref_number}</td>
       <td>${yesNo(row.paperwork_received)}</td>
       <td>${yesNo(row.product_received)}</td>
+      <td>${yesNo(row.move_to_machines)}</td>
+      <td>${yesNo(row.move_to_shipping)}</td>
       <td>${row.users_seen || "-"}</td>
       <td>${row.latest_added_time || "-"}</td>
     `;
@@ -87,6 +89,8 @@ function showDetail(row) {
       <dt>Ref Number</dt><dd>${row.ref_number || "-"}</dd>
       <dt>Paperwork Received</dt><dd>${row.paperwork_received ? "Yes" : "No"}</dd>
       <dt>Product Received</dt><dd>${row.product_received ? "Yes" : "No"}</dd>
+      <dt>Move to Machines</dt><dd>${row.move_to_machines ? "Yes" : "No"}</dd>
+      <dt>Move to Shipping</dt><dd>${row.move_to_shipping ? "Yes" : "No"}</dd>
       <dt>Users Seen</dt><dd>${row.users_seen || "-"}</dd>
       <dt>Stages Seen</dt><dd>${row.stages_seen || "-"}</dd>
       <dt>Latest Added Time</dt><dd>${row.latest_added_time || "-"}</dd>
