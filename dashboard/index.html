@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Order Reconciliation Dashboard</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header class="header">
+      <h1>Order Reconciliation Dashboard</h1>
+      <p>Track complete vs partial receiving status by order.</p>
+    </header>
+
+    <section class="cards" id="summary-cards">
+      <article class="card">
+        <h2>Total Orders</h2>
+        <p id="count-total">-</p>
+      </article>
+      <article class="card complete">
+        <h2>Complete (Both Received)</h2>
+        <p id="count-complete">-</p>
+      </article>
+      <article class="card partial">
+        <h2>Partial (One Received)</h2>
+        <p id="count-partial">-</p>
+      </article>
+      <article class="card paperwork">
+        <h2>Paperwork Only</h2>
+        <p id="count-paperwork-only">-</p>
+      </article>
+      <article class="card product">
+        <h2>Product Only</h2>
+        <p id="count-product-only">-</p>
+      </article>
+    </section>
+
+    <section class="controls">
+      <label>
+        View
+        <select id="view-filter">
+          <option value="all">All</option>
+          <option value="complete">Complete</option>
+          <option value="partial">Partial</option>
+          <option value="paperwork_only">Paperwork Only</option>
+          <option value="product_only">Product Only</option>
+        </select>
+      </label>
+      <label>
+        Search
+        <input id="search" type="search" placeholder="Order key, ref number, user, stage..." />
+      </label>
+    </section>
+
+    <section class="table-wrap">
+      <table id="orders-table">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Order Key</th>
+            <th>Prefix</th>
+            <th>Ref Number</th>
+            <th>Paperwork</th>
+            <th>Product</th>
+            <th>Users</th>
+            <th>Latest Added</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p id="empty-state" class="hidden">No orders match your filter.</p>
+    </section>
+  </main>
+
+  <dialog id="order-detail">
+    <article>
+      <header class="detail-header">
+        <h3 id="detail-title">Order</h3>
+        <button id="close-detail" type="button">Close</button>
+      </header>
+      <div id="detail-body"></div>
+    </article>
+  </dialog>
+
+  <script src="./app.js"></script>
+</body>
+</html>
