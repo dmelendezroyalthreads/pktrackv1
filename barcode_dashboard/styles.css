@@ -1,0 +1,162 @@
+:root {
+  --bg: #f1f7f5;
+  --card: #ffffff;
+  --ink: #172026;
+  --muted: #4f6272;
+  --line: #d4e1e8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top right, #c9f9d5 0, transparent 38%),
+    radial-gradient(circle at left 25%, #d9ecff 0, transparent 44%),
+    var(--bg);
+}
+
+.wrap {
+  width: min(1200px, 94vw);
+  margin: 2rem auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 1rem;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: clamp(1.5rem, 2.3vw, 2.2rem);
+}
+
+.header p {
+  color: var(--muted);
+  margin-top: 0.35rem;
+}
+
+.sync-panel {
+  background: #fffdf4;
+  border: 1px solid #f2d98d;
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+  min-width: 260px;
+}
+
+.sync-label {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #7c5500;
+}
+
+.sync-time {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-left: 6px solid #4e9a7b;
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+}
+
+.card h2 {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.card p {
+  margin: 0.3rem 0 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.controls {
+  margin-top: 1rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.8rem;
+}
+
+.controls label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+}
+
+input {
+  padding: 0.55rem 0.6rem;
+  border: 1px solid #bcccdc;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.table-wrap {
+  margin-top: 1rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.6rem 0.65rem;
+  border-bottom: 1px solid #eef2f6;
+  font-size: 0.88rem;
+}
+
+th {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: #f9fbfc;
+}
+
+#empty-state {
+  margin: 0;
+  padding: 1rem;
+  color: var(--muted);
+}
+
+.hidden {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .sync-panel {
+    min-width: 0;
+    width: 100%;
+  }
+}

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Barcode Tracking Online</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <main class="wrap">
+    <header class="header">
+      <div>
+        <h1>Barcode Tracking Online</h1>
+        <p>Search delivery records by ORDER, PICK or PO. NUMBER.</p>
+      </div>
+      <aside class="sync-panel" aria-live="polite">
+        <p id="sync-status" class="sync-label">Live sync: checking...</p>
+        <p id="sync-time" class="sync-time">-</p>
+      </aside>
+    </header>
+
+    <section class="cards">
+      <article class="card">
+        <h2>Total Records</h2>
+        <p id="count-total">-</p>
+      </article>
+      <article class="card">
+        <h2>Unique ORDER/PICK/PO</h2>
+        <p id="count-unique">-</p>
+      </article>
+    </section>
+
+    <section class="controls">
+      <label>
+        Search ORDER, PICK or PO. NUMBER
+        <input id="search" type="search" placeholder="Type number, dropped by, or date..." />
+      </label>
+    </section>
+
+    <section class="table-wrap">
+      <table id="records-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>ORDER / PICK / PO. NUMBER</th>
+            <th>Dropped Off By</th>
+            <th>Date-Time</th>
+            <th>Added Time</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <p id="empty-state" class="hidden">No records match your search.</p>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>

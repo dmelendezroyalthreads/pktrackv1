@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: barcode-tracking-online
+    runtime: python
+    plan: starter
+    buildCommand: echo "No build step required"
+    startCommand: python3 barcode_dashboard/server.py
+    envVars:
+      - key: ZB_WEBHOOK_SECRET
+        sync: false
+      - key: ZB_BOOTSTRAP_CSV
+        value: BARCODEDELIVERYTRACKING_Report.csv
