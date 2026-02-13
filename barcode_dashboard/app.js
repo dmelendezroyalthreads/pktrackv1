@@ -5,6 +5,7 @@ const syncStatus = document.getElementById("sync-status");
 const syncTime = document.getElementById("sync-time");
 
 let allRecords = [];
+const emailSubject = "Going to Production and We have the barcodes";
 
 function formatTime(rawIso) {
   if (!rawIso) return "-";
@@ -29,16 +30,43 @@ function setSyncMeta(meta) {
   syncTime.textContent = "No live Zoho event has been received yet.";
 }
 
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function emailLink(row) {
+  const body = [
+    "Team,",
+    "",
+    "Going to Production and We have the barcodes.",
+    "",
+    "Record Details:",
+    `ORDER / PICK / PO. NUMBER: ${row.order_value || "-"}`,
+    `Dropped Off By: ${row.dropped_off_by || "-"}`,
+    `Date-Time: ${row.date_time || "-"}`,
+    `Added Time: ${row.added_time || "-"}`,
+  ].join("\n");
+
+  const url = `https://outlook.office.com/mail/deeplink/compose?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(body)}`;
+  return `<a class="email-link" href="${url}" target="_blank" rel="noopener noreferrer">Email</a>`;
+}
+
 function renderRows(rows) {
   tableBody.innerHTML = "";
   for (const row of rows) {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${row.id}</td>
-      <td>${row.order_value || "-"}</td>
-      <td>${row.dropped_off_by || "-"}</td>
-      <td>${row.date_time || "-"}</td>
-      <td>${row.added_time || "-"}</td>
+      <td>${escapeHtml(row.order_value || "-")}</td>
+      <td>${escapeHtml(row.dropped_off_by || "-")}</td>
+      <td>${escapeHtml(row.date_time || "-")}</td>
+      <td>${escapeHtml(row.added_time || "-")}</td>
+      <td>${emailLink(row)}</td>
     `;
     tableBody.appendChild(tr);
   }
